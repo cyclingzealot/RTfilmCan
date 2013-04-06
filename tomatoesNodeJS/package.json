@@ -1,0 +1,20 @@
+{
+  "name": "tomatoes",
+  "version": "0.0.1",
+  "description": "Simple interface for the rotten tomatoes API",
+  "keywords": ["rotten tomatoes", "movies", "ratings"],
+  "author": "Hunter Loftis <hunter@hunterloftis.com>",
+  "repository": { "type": "git", "url": "git@github.com:Skookum/tomatoes.git" },
+  "main": "./index",
+  "engines": { "node": ">= 0.6.x < 0.8.0" },
+  "scripts": {
+    "test": "make test"
+  },
+  "dependencies": {
+    "superagent": "0.7.0"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  }
+}
