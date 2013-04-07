@@ -4,6 +4,7 @@
 // @description Adds RT info for movie listings on filmcan
 // @include     *.filmcan.ca
 // @version     1
+// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 // ==/UserScript==
 
 // ---------------------------------------------------------------------
@@ -23,28 +24,12 @@ useRottenTomatoesColors = true;
 //showAudience = false;
 showAudience = true;
 
-// options below are temporarily deprecated until Rotten Tomatoes adds them to their API
-	//showAverageRating = false;
-	//showAverageRating = true;
-
-	//showReviewCount = false;
-	//showReviewCount = true;
-
-	//showFreshReviewCount = false;
-	//showFreshReviewCount = true;
-
-	//showRottenReviewCount = false;
-	//showRottenReviewCount = true;
 
 // ==/User-Defined Variables==
 
-if (document.getElementById('tn15') != null) {
-	oldImdbLayout = true;
-}
-else {
-	oldImdbLayout = false;
-}
 
+
+//====================================== BEGIN Style sheet add
 if (useRottenTomatoesColors == true) {
 	var stylesheet = '								\
 <style>												\
@@ -192,30 +177,17 @@ else {
 }
 $('head').append(stylesheet);
 
-findPattern = "//h2[@class='movielist']";
-results = document.evaluate( findPattern, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
 
-if (results.snapshotItem(0) != null)
-{
-	proImdbLayout = true;
-}
-else {
-	proImdbLayout = false;
-}
 
-$('head').append(stylesheet);
+//Not appending style sheet until we need it.
+//$('head').append(stylesheet);
+
+//====================================== END Style sheet add
 
 var insertSelector = "div.star-box";
 var labelHtml = 'Rotten Tomatoes:';
 
 
-if (oldImdbLayout == true) {
-	insertSelector = "div.info:first";
-}
-
-if (proImdbLayout == true) {
-	insertSelector = "table.probody";
-}
 
 var spinnerGif = $('<img></img>').
 	attr('alt', "...").
@@ -253,12 +225,43 @@ var spinnerGif = $('<img></img>').
 		'YY9HCDEZTlxA8cOVwUGBAAA7AAAAAAAAAAAA'
 	);
 	
+
+addAnchors();
+
+function addAnchors() {
+	$('h2.movielist').each(function( index ) {
+
+		var movieTitle = $(this).text();
+		console.log( index + ": " + movieTitle );
+		
+		//movieYear = Do a function to get the movie year?
+		
+		var movieInfoSpan = $('<span></span>').
+		attr('id', 'rtmovie' + index).
+		attr('data-title', movieTitle).
+		append(spinnerGif.clone()); 
+		
+		$(this).append(movieInfoSpan);
+});
+}
+	
+
+
+/**
+ * Get movie information from RT by IMDB
+ * Script first calls this, then falls back to getRTFromTitle
+ */
 function getRTFromImdbId() {
 
+	// Create a div with id rottenTomatoesResults
+	// This will be used as an anchor to insert RT info.
 	var rottenTomatoesResults = $('<div></div>').
 		attr('id', "rottenTomatoesResults").
 		html("Checking Rotten Tomatoes... ").
 		append(spinnerGif); 
+	
+	// Append the previously created div 
+	// to the location identified by insertSelector
 	$(insertSelector).append(rottenTomatoesResults);
 
 	$.getJSON('http://api.rottentomatoes.com/api/public/v1.0/movie_alias.json?type=imdb&id='+getIMDBid()+'&apikey='+rottenTomatoesApiKey, function(response){
@@ -278,6 +281,12 @@ function getRTFromImdbId() {
 
 } // end function getRTFromImdbId
 
+
+
+
+/**
+ * Get movie information from RT by movie name and movie year
+ */
 function getRTFromTitle() {
 
 	var rtUrl = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey='+rottenTomatoesApiKey+'&q='+getMovieName()+'%20'+getMovieYear();
@@ -298,7 +307,15 @@ function getRTFromTitle() {
 		}
 	});
 }
+
+
+
+/**
+ * Parse a valid (non-error) response from the RT API
+ */
 function parseValidResponse(response) {
+	// Pickup the anchor point (div with id rottenTomatoesResults)
+	// previously created.  
 	var rottenResults = $('#rottenTomatoesResults');
 	
 	// add tomato-meter score and icon
@@ -414,6 +431,8 @@ function parseValidResponse(response) {
 		);
 	}
 	
+	
+	// Append the parsed results to the anchor point. (div with id rottenTomatoesResults)
 	rottenResults.append(
 		$('<div></div>').
 			addClass("rottenClear").
@@ -430,12 +449,21 @@ function parseValidResponse(response) {
 	
 }
 
+
+/** 
+ * Get the IMDB ID from the document location
+*/
 function getIMDBid () {
 	var regexImdbNum = /\/title\/tt(\d{7})\//;
 	id = regexImdbNum.exec(document.location);
 	return id[1];
 }
 
+
+
+/**
+ * Get the movie year using document.evaluate and specified xpath
+*/
 function getMovieYear() {
 	var links = document.evaluate(
 			"//a[contains(@href,'year')]/text()",
@@ -450,7 +478,12 @@ function getMovieYear() {
 	return year;
 }
 
+
+/**
+ * Get the movie name using document.evaluate and the specified xpath
+*/
 function getMovieName () {
 	const $xpath = '//h1/text()';
 	var $nodes = document.evaluate($xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 	return escape($nodes.singleNodeValue.data.replace(/[^\w \xC0-\xFF]/g, ''));
+}

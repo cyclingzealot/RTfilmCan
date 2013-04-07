@@ -2,6 +2,12 @@
 Design goal: isolate (and group?) all functionality that is independant of display 
 
 1. For every film title listed, display one piece of info
+1.1 Put a spinner after every movie title.
+1.2 Put an achor point with data- after every tile
+1.3 Create a function that accepts movie title and year 
+1.4 for each anchor point, feed that to function
+1.5
+
 3. If year is necessary, create function to pull it
 
 2. For every film title listed, display enough info to make a choice 
