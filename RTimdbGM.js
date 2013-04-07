@@ -34,7 +34,7 @@
 
 // ==User-Defined Variables==
 
-rottenTomatoesApiKey = 'rya8rbpjf93kx9xcu2876ght'; // customize for your own Rotten Tomatoes API login details
+rottenTomatoesApiKey = 'f5j7vv8nmzhfa38qbx4b5gmg'; // customize for your own Rotten Tomatoes API login details
 
 //showConsensus = false;
 showConsensus = true;
@@ -216,7 +216,7 @@ else {
 }
 $('head').append(stylesheet);
 
-
+//============= BEGIN Determine layout before addint stylesheet
 findPattern = "//table[@class='probody']";
 results = document.evaluate( findPattern, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
 
@@ -227,6 +227,8 @@ if (results.snapshotItem(0) != null)
 else {
 	proImdbLayout = false;
 }
+//============= END Determine layout before addint stylesheet
+
 
 $('head').append(stylesheet);
 
