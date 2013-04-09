@@ -5,6 +5,7 @@
 // @include     *.filmcan.ca
 // @version     1
 // @require			http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
+// @grant none
 // ==/UserScript==
 
 // ---------------------------------------------------------------------
@@ -14,6 +15,8 @@
 // ==User-Defined Variables==
 
 rottenTomatoesApiKey = 'f5j7vv8nmzhfa38qbx4b5gmg'; // customize for your own Rotten Tomatoes API login details
+
+console.log("Back up here");
 
 //showConsensus = false;
 showConsensus = true;
@@ -226,86 +229,73 @@ var spinnerGif = $('<img></img>').
 	);
 	
 
-addAnchors();
+var rtSpans = addAnchors();
+
+$.each(rtSpans, function( index ) {
+	//console.log("Firing getInfo");
+	getInfo($(this).attr('data-title'), $(this).attr('data-link'));
+});
 
 function addAnchors() {
+	anchorCollection = [];
+	
 	$('h2.movielist').each(function( index ) {
 
-		var movieTitle = $(this).text();
-		console.log( index + ": " + movieTitle );
+		var movieTitle = $(this).children('a').text();
+		var anchorID = 'rtmovie' + index;
+		var movieLink = $(this).children('a').attr('href');
 		
-		//movieYear = Do a function to get the movie year?
+		console.log( "I found: " + index + ": " + movieTitle + " | " + movieLink);
 		
 		var movieInfoSpan = $('<span></span>').
-		attr('id', 'rtmovie' + index).
+		attr('id', anchorID).
 		attr('data-title', movieTitle).
+		attr('data-link', movieLink).
 		append(spinnerGif.clone()); 
 		
 		$(this).append(movieInfoSpan);
-});
-}
-	
-
-
-/**
- * Get movie information from RT by IMDB
- * Script first calls this, then falls back to getRTFromTitle
- */
-function getRTFromImdbId() {
-
-	// Create a div with id rottenTomatoesResults
-	// This will be used as an anchor to insert RT info.
-	var rottenTomatoesResults = $('<div></div>').
-		attr('id', "rottenTomatoesResults").
-		html("Checking Rotten Tomatoes... ").
-		append(spinnerGif); 
-	
-	// Append the previously created div 
-	// to the location identified by insertSelector
-	$(insertSelector).append(rottenTomatoesResults);
-
-	$.getJSON('http://api.rottentomatoes.com/api/public/v1.0/movie_alias.json?type=imdb&id='+getIMDBid()+'&apikey='+rottenTomatoesApiKey, function(response){
 		
-		if (response.hasOwnProperty("error")) {
-			rottenTomatoesResults.html("Got error from Rotten Tomatoes' IMDb Alias API: \"").
-				append(response.error).
-				append("\" Trying Rotten Tomatoes Movie API...").
-				append(spinnerGif);
-			getRTFromTitle();
-		}
-		else {
-			parseValidResponse(response);
-		}
-		
+		anchorCollection.push(movieInfoSpan);
 	});
+	
+	return anchorCollection;
+}
 
-} // end function getRTFromImdbId
 
-
-
-
+ 
 /**
  * Get movie information from RT by movie name and movie year
  */
-function getRTFromTitle() {
+function getInfo(movieName, movieLink) {
+	console.log("getInfo: " + movieName);
+	
+	var returnValue;
 
-	var rtUrl = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey='+rottenTomatoesApiKey+'&q='+getMovieName()+'%20'+getMovieYear();
+	//var rtUrl = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey='+rottenTomatoesApiKey+'&q='+getMovieName()+'%20'+getMovieYear();
+	var rtUrl = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey='+rottenTomatoesApiKey+'&q='+movieName+'%202013';
 
+	console.log("Getting json for " + rtUrl);
 	$.getJSON(rtUrl, function(response){
-		if (response.hasOwnProperty("error")) {
-			rottenTomatoesResults.html("Got error from Rotten Tomatoes' Movie API: \"").
-				append(response.error).
-				append("\" Giving up.");
+		console.log(response);
+		console.log("LIne 274a");
+		if (response.hasOwnProperty("movies")) {
+			if(response.movies.length > 1) {
+				console.log('More than 1 movie');
+			}
+			console.log('Returning valid reseponse');
+			returnValue = response.movies[0];
+		}
+		else if (response.hasOwnProperty("error")) {
+			console.log("LIne 283a");
+			returnValue = response.error;
 		}
 		else {
-			if (response.hasOwnProperty("movies")) {
-				parseValidResponse(response.movies[0])
+			console.log("LIne 287a");
+			returnValue = "Unable to find film in Rotten Tomatoes' Movie API. Giving up.";
 			}
-			else {
-				rottenTomatoesResults.html("Unable to find film in Rotten Tomatoes' Movie API. Giving up.");
-			}
-		}
 	});
+	
+	return returnValue;
 }
 
 
