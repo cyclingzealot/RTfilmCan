@@ -4,7 +4,7 @@
 // @description Adds RT info for movie listings on filmcan
 // @include     *.filmcan.ca
 // @version     1
-// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
+// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
 // @grant none
 // ==/UserScript==
 
@@ -14,7 +14,7 @@
 
 // ==User-Defined Variables==
 
-rottenTomatoesApiKey = 'f5j7vv8nmzhfa38qbx4b5gmg'; // customize for your own Rotten Tomatoes API login details
+rottenTomatoesApiKey = 'ypqq5sx2zuw34wnfj6cxrnrq'; // customize for your own Rotten Tomatoes API login details
 
 console.log("Back up here");
 
@@ -274,10 +274,9 @@ function getInfo(movieName, movieLink) {
 	//var rtUrl = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey='+rottenTomatoesApiKey+'&q='+getMovieName()+'%20'+getMovieYear();
 	var rtUrl = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey='+rottenTomatoesApiKey+'&q='+movieName+'%202013';
 
-	console.log("Getting json for " + rtUrl);
+	console.log("Getting json for " + rtUrl);	
 	$.getJSON(rtUrl, function(response){
-		console.log(response);
-		console.log("LIne 274a");
+		console.log("LIne 309");
 		if (response.hasOwnProperty("movies")) {
 			if(response.movies.length > 1) {
 				console.log('More than 1 movie');
@@ -286,7 +285,7 @@ function getInfo(movieName, movieLink) {
 			returnValue = response.movies[0];
 		}
 		else if (response.hasOwnProperty("error")) {
-			console.log("LIne 283a");
+			console.log("LIne 318");
 			returnValue = response.error;
 		}
 		else {
